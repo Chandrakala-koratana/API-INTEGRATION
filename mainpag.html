@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App - Advanced</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Weather App</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/homepage">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/developer">Developer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog">Blog</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container" id="home">
+        <h1>Advanced Weather App</h1>
+        <p id="date-time"></p>
+        <input type="text" id="city" placeholder="Enter city name">
+        <button onclick="getWeather()">Get Weather</button>
+        <button onclick="getLocationWeather()">Use My Location</button>
+        <div id="weather"></div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 Our Website. All rights reserved.</p>
+    </footer>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+
+        async function getWeather() {
+            const city = document.getElementById('city').value;
+            const apiKey = 'f57bd504d09abe7b16af59bf51330add'; 
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.cod !== 200) {
+                    document.getElementById('weather').innerHTML = `<p class='error'>${data.message}</p>`;
+                    return;
+                }
+                document.getElementById('weather').innerHTML = `
+                    <div class="weather-info">
+                        <h2>${data.name}, ${data.sys.country}</h2>
+                        <p>Temperature: ${data.main.temp}°C</p>
+                        <p>Weather: ${data.weather[0].description}</p>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('weather').innerHTML = `<p class='error'>Failed to fetch data</p>`;
+            }
+        }
+
+        function getLocationWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const apiKey = 'f57bd504d09abe7b16af59bf51330add';
+                    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+                    
+                    try {
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        if (data.cod !== 200) {
+                            document.getElementById('weather').innerHTML = `<p class='error'>${data.message}</p>`;
+                            return;
+                        }
+                        document.getElementById('weather').innerHTML = `
+                            <div class="weather-info">
+                                <h2>${data.name}, ${data.sys.country}</h2>
+                                <p>Temperature: ${data.main.temp}°C</p>
+                                <p>Weather: ${data.weather[0].description}</p>
+                            </div>
+                        `;
+                    } catch (error) {
+                        document.getElementById('weather').innerHTML = `<p class='error'>Failed to fetch data</p>`;
+                    }
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('date-time').innerText = now.toLocaleString();
+        }
+    </script>
+</body>
+</html>
